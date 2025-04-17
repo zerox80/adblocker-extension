@@ -1,0 +1,38 @@
+// manifest.json
+{
+    "manifest_version": 3,
+    "name": "Mein Performanter AdBlocker",
+    "version": "0.1.0",
+    "description": "Ein AdBlocker mit Fokus auf Performance und MV3.",
+    "permissions": [
+      "declarativeNetRequest", // Kern-API für Blocking
+      "declarativeNetRequestFeedback", // Um Infos über blockierte Anfragen zu bekommen (optional, für genaue Stats)
+      "storage" // Zum Speichern von Statistiken und Einstellungen
+      // "declarativeNetRequestWithHostAccess" // Benötigt, wenn Regeln Host-Permissions brauchen
+    ],
+    "host_permissions": [
+      "<all_urls>" // Notwendig, damit declarativeNetRequest auf allen Seiten arbeiten kann
+    ],
+    "background": {
+      "service_worker": "background/background.js",
+      "type": "module" // Ermöglicht die Nutzung von import/export im Service Worker
+    },
+    "action": {
+      "default_popup": "popup/popup.html",
+      "default_icon": {
+        "16": "icons/icon16.png",
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
+      }
+    },
+    "icons": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    // Optional: Wenn du WASM nutzt, musst du ggf. die Content Security Policy anpassen
+    "content_security_policy": {
+      "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
+      // 'wasm-unsafe-eval' ist oft nötig für WASM, prüfe die Doku je nach Lade-Methode
+    }
+  }
