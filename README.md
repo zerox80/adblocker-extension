@@ -61,7 +61,26 @@ The extension icon should appear in your browser toolbar.
     * Show 'ERR' or 'UPD ERR' in red if a critical error occurs during setup or rule updates.
 
 ## Project Structure
-
+adblock-extension/
+├── background/
+│   └── background.js       # Service worker (main logic, event handling)
+├── filter_lists/
+│   └── filter.txt          # Ad/tracker blocking rules
+├── icons/
+│   ├── icon16.png
+│   ├── icon48.png
+│   └── icon128.png         # Extension icons
+├── js/
+│   └── rule_parser.js      # JavaScript filter list parser and DNR rule updater
+├── popup/
+│   ├── popup.html          # Popup structure
+│   ├── popup.css           # Popup styling
+│   └── popup.js            # Popup logic (stats display, refresh)
+├── wasm/                   # Experimental WASM parser
+│   ├── filter_parser.js    # Emscripten JS wrapper for WASM
+│   ├── filter_parser.wasm  # Compiled WebAssembly module (Needs compilation)
+│   └── parser.cc           # C++ source for the WASM parser (Conceptual)
+└── manifest.json           # Extension configuration file
 
 ## Future Improvements / Roadmap
 
