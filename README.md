@@ -1,6 +1,3 @@
-Okay, here is the complete README content formatted in Markdown, ready for you to copy and paste directly into your `README.md` file on GitHub.
-
-```markdown
 # Performant MV3 Ad Blocker Extension
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) A Chrome browser extension demonstrating an ad blocker built with Manifest V3, focusing on performance using the Declarative Net Request API.
@@ -65,28 +62,6 @@ The extension icon should appear in your browser toolbar.
 
 ## Project Structure
 
-```
-adblock-extension/
-├── background/
-│   └── background.js       # Service worker (main logic, event handling)
-├── filter_lists/
-│   └── filter.txt          # Ad/tracker blocking rules
-├── icons/
-│   ├── icon16.png
-│   ├── icon48.png
-│   └── icon128.png         # Extension icons
-├── js/
-│   └── rule_parser.js      # JavaScript filter list parser and DNR rule updater
-├── popup/
-│   ├── popup.html          # Popup structure
-│   ├── popup.css           # Popup styling
-│   └── popup.js            # Popup logic (stats display, refresh)
-├── wasm/                   # Experimental WASM parser
-│   ├── filter_parser.js    # Emscripten JS wrapper for WASM
-│   ├── filter_parser.wasm  # Compiled WebAssembly module (Needs compilation)
-│   └── parser.cc           # C++ source for the WASM parser (Conceptual)
-└── manifest.json           # Extension configuration file
-```
 
 ## Future Improvements / Roadmap
 
@@ -103,5 +78,3 @@ Contributions are welcome! Please feel free to submit a pull request or open an 
 ## License
 
 This project is licensed under the MIT License - see the `LICENSE.md` file for details (You should add a `LICENSE.md` file - MIT is a common choice).
-
-```
