@@ -380,7 +380,6 @@
 ||solocpm.com^
 ||sonobi.com^
 ||sortable.com^
-||soundcloud.com^$third-party
 ||sponsorpay.com^
 ||springserve.com^
 ||sprout.com^
@@ -391,13 +390,11 @@
 ||startappservice.com^
 ||statcounter.com^
 ||stats-locations.com^
-||stepstone.com^$third-party
 ||stickyeyes.com^
 ||stormiq.com^
 ||stratechalk.com^
 ||streamamp.net^
 ||streamrail.net^
-||stripe.com^$third-party
 ||struq.com^
 ||sub2tech.com^
 ||sumome.com^
@@ -579,7 +576,6 @@
 ||buzzoola.com^
 ||buzzi.biz^
 ||bxclix.com^
-||cachefly.net^$third-party
 ||calltouch.ru^
 ||campaignmonitor.com^
 ||captify.net^
@@ -646,11 +642,8 @@
 ||emediate.com^
 ||emediate.eu^
 ||adfair.se^
-||eniro.com^$third-party
-||eniro.se^$third-party
 ||cooladata.com^
 ||netminers.dk^
-||kantarmedia.com^$third-party
 ||tns-gallup.dk^
 ||netratings.com^
 ||adnami.io^
@@ -685,7 +678,6 @@
 ||adalliance.io^
 ||adap.tv^
 ||adaptmx.com^
-||addsearch.com^$third-party
 ||adfactor.pl^
 ||adfliction.com^
 ||adgrx.com^
@@ -695,7 +687,6 @@
 ||adhouse.com^
 ||adinfuse.com^
 ||adinplay.com^
-||adinserter.pro^$third-party
 ||adinte.jp^
 ||adition-srv.com^
 ||adivit.de^
