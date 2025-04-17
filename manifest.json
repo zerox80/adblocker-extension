@@ -1,9 +1,9 @@
 // manifest.json
 {
     "manifest_version": 3,
-    "name": "Mein Performanter AdBlocker",
+    "name": "Pagy Blocker",
     "version": "0.1.0",
-    "description": "Ein AdBlocker mit Fokus auf Performance und MV3.",
+    "description": "Pagy",
     "permissions": [
       "declarativeNetRequest", // Kern-API für Blocking
       "declarativeNetRequestFeedback", // Um Infos über blockierte Anfragen zu bekommen (optional, für genaue Stats)
