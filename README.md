@@ -6,12 +6,12 @@
 
 This extension provides basic ad and tracker blocking functionality by parsing a filter list (similar to EasyList format) and converting the rules into the format required by Chrome's `declarativeNetRequest` API. It prioritizes efficiency and adherence to the Manifest V3 architecture.
 
-The current implementation uses a JavaScript-based parser for the filter list. An experimental WebAssembly (WASM) parser (`wasm/`) is included as a proof-of-concept for potential future performance improvements.
+**Blocking läuft im Browser‑Kernel, nicht in JavaScript**, da alle Filterregeln über die `declarativeNetRequest` API direkt im nativen Browser‑Engine umgesetzt werden.
 
 ## Features
 
 * **Manifest V3 Compliant:** Built using the modern Chrome extension platform.
-* **Declarative Net Request API:** Leverages Chrome's efficient, privacy-preserving mechanism for blocking network requests.
+* **Declarative Net Request API:** Leverages Chrome's efficient, privacy-preserving mechanism for blocking network requests (Blocking in Browser‑Kernel, not in JavaScript).
 * **Filter List Parsing:** Reads rules from `filter_lists/filter.txt`.
     * Supports common filter syntax like `||domain.example^`.
     * Supports `$domain=` options for specifying triggering/excluded domains.
@@ -60,7 +60,6 @@ The extension icon should appear in your browser toolbar.
     * Be empty upon successful initialization/update.
     * Show 'ERR' or 'UPD ERR' in red if a critical error occurs during setup or rule updates.
 
-
 ## Future Improvements / Roadmap
 
 * Integrate the WebAssembly parser for potentially faster filter list processing.
@@ -75,4 +74,5 @@ Contributions are welcome! Please feel free to submit a pull request or open an 
 
 ## License
 
-This project is licensed under the MIT License - see the `LICENSE.md` file for details (You should add a `LICENSE.md` file - MIT is a common choice).
+This project is licensed under the MIT License - see the `LICENSE.md` file for details.
+
