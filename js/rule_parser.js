@@ -1,10 +1,3 @@
-// js/rule_parser.js (Fixed: Ensures unique IDs by removing existing rules before adding)
-
-/**
- * Parses a filter list text (EasyList-like) into Chrome DNR rules.
- * @param {string} filterListText
- * @returns {Promise<chrome.declarativeNetRequest.Rule[]>}
- */
 export async function parseFilterList(filterListText) {
     const lines = filterListText.split(/\r?\n/);
     const rules = [];
