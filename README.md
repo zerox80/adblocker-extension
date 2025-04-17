@@ -39,7 +39,7 @@ The current implementation uses a JavaScript-based parser for the filter list. A
 
 1.  **Clone or Download:** Get a copy of this repository.
     ```bash
-    git clone <your-repository-url>
+    git clone https://github.com/zerox80/adblocker-extension/
     cd adblock-extension
     ```
 2.  **Open Chrome/Chromium Extensions:** Navigate to `chrome://extensions` in your browser.
