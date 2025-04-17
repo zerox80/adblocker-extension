@@ -1,14 +1,11 @@
-// wasm/parser.cc (Konzept)
 #include <string>
 #include <vector>
 #include <sstream>
 #include <emscripten/bind.h>
-// Ggf. JSON-Bibliothek einbinden
 
 struct DnrRule {
     int id;
     int priority;
-    // ... weitere Felder für action und condition
     std::string conditionUrlFilter;
     std::vector<std::string> resourceTypes;
 };
