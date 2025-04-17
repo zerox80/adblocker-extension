@@ -6,8 +6,7 @@
 
 This extension provides basic ad and tracker blocking functionality by parsing a filter list (similar to EasyList format) and converting the rules into the format required by Chrome's `declarativeNetRequest` API. It prioritizes efficiency and adherence to the Manifest V3 architecture.
 
-**Blocking läuft im Browser‑Kernel, nicht in JavaScript**, da alle Filterregeln über die `declarativeNetRequest` API direkt im nativen Browser‑Engine umgesetzt werden.
-
+**Blocking runs in the browser kernel, not in JavaScript**, as all filter rules are implemented directly in the native browser engine via the `declarativeNetRequest` API.
 ## Features
 
 * **Manifest V3 Compliant:** Built using the modern Chrome extension platform.
