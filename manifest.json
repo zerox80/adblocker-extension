@@ -30,7 +30,6 @@
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     },
-    // Optional: Wenn du WASM nutzt, musst du ggf. die Content Security Policy anpassen
     "content_security_policy": {
       "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
       // 'wasm-unsafe-eval' ist oft nötig für WASM, prüfe die Doku je nach Lade-Methode
