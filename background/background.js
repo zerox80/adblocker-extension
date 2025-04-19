@@ -1,143 +1,181 @@
-// background/background.js (Using JavaScript Parser)
+import { updateRules } from '../js/rule_parser.js';
+import createFilterParserModule from '../wasm/filter_parser.js';
 
-// Importiere die benötigten Funktionen aus dem JS-Modul
-import { parseFilterList, updateRules } from '../js/rule_parser.js';
+let wasmModule = null;
 
-// Globale Variable für Zähler (Platzhalter/Schätzung)
-let blockedRequestsCount = 0; // Dieser Zähler wird aktuell NICHT für blockierte Anfragen verwendet
-
-// --- HILFSFUNKTION: Badge leeren ---
 async function clearBadge() {
-    try {
-        await chrome.action.setBadgeText({ text: '' });
-    } catch (error) {
-        // Ignoriere Fehler, falls der Badge nicht gesetzt werden kann (z.B. während Initialisierung)
-        // console.warn("Could not clear badge:", error.message);
-    }
+    try {
+        if (chrome.action && chrome.action.setBadgeText) {
+            await chrome.action.setBadgeText({ text: '' });
+        }
+    } catch (error) { }
 }
-
-// --- HILFSFUNKTION: Fehler-Badge setzen ---
 async function setErrorBadge(text = 'ERR') {
-     try {
-        await chrome.action.setBadgeText({ text });
-        await chrome.action.setBadgeBackgroundColor({ color: '#FF0000' });
-     } catch (error) {
-        console.warn("Could not set error badge:", error.message);
-     }
+     try {
+        if (chrome.action && chrome.action.setBadgeText && chrome.action.setBadgeBackgroundColor) {
+            await chrome.action.setBadgeText({ text });
+            await chrome.action.setBadgeBackgroundColor({ color: '#FF0000' });
+        }
+     } catch (error) { console.warn("Could not set error badge:", error.message); }
 }
 
+async function ensureWasmModuleLoaded() {
+    if (!wasmModule) {
+        console.log("Initializing WASM module instance...");
+        console.time("WASM Module Init");
+        try {
+            wasmModule = await createFilterParserModule();
+            console.timeEnd("WASM Module Init");
+            console.log("WASM module instance initialized.");
 
-// Initialisierungsfunktion, die den JavaScript-Parser verwendet
+            if (!wasmModule || typeof wasmModule.parseFilterListWasm !== 'function') {
+                 wasmModule = null;
+                 throw new Error("WASM module loaded, but 'parseFilterListWasm' function not found or not a function.");
+            }
+        } catch(error) {
+            console.error("Failed to load or initialize WASM module:", error);
+            if (error.stack) { console.error(error.stack); }
+            wasmModule = null;
+             throw error;
+        }
+    } else {
+         console.log("Using existing WASM module instance.");
+    }
+    return wasmModule;
+}
+
+async function fetchFilterList() {
+    const filterListURL = chrome.runtime.getURL('filter_lists/filter.txt');
+    console.log(`Workspaceing filter list from URL: ${filterListURL}`);
+
+    const response = await fetch(filterListURL);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch filter list: ${response.statusText} (Status: ${response.status}, URL: ${response.url})`);
+    }
+    const filterListText = await response.text();
+    console.log(`Workspaceed filter list (${filterListText.length} chars).`);
+    return filterListText;
+}
+
+function parseListWithWasm(module, filterListText) {
+    console.time("WASM Parsing");
+    const resultJsonString = module.parseFilterListWasm(filterListText);
+    console.timeEnd("WASM Parsing");
+
+    if (!resultJsonString) {
+        throw new Error("WASM parser returned empty result.");
+    }
+    let result;
+    try {
+        result = JSON.parse(resultJsonString);
+    } catch (parseError) {
+        console.error("Failed to parse JSON result from WASM:", resultJsonString);
+        throw new Error(`Failed to parse JSON result from WASM: ${parseError.message}`);
+    }
+
+    if (!result || !Array.isArray(result.rules) || typeof result.stats !== 'object') {
+         console.error("Invalid result structure from WASM parser:", result);
+         throw new Error("Invalid result structure from WASM parser.");
+    }
+    console.log(`WASM Parser Stats: Total lines: ${result.stats.totalLines}, Processed rules: ${result.stats.processedRules}, Skipped lines: ${result.stats.skippedLines}`);
+    console.log(`Parsed ${result.rules.length} rules via WASM.`);
+    return result;
+}
+
 async function initialize() {
-  console.log("Initializing AdBlocker (using JavaScript Parser)...");
-  await clearBadge(); // Badge beim Start leeren
-  try {
-    // 1. Filterliste holen
-    const response = await fetch('../filter_lists/filter.txt');
-    if (!response.ok) {
-      throw new Error(`Failed to fetch filter list: ${response.statusText} (Status: ${response.status})`);
-    }
-    const filterListText = await response.text();
-    console.log(`Workspaceed filter list (${filterListText.length} chars).`);
+  console.log("Initializing AdBlocker (using WASM Parser)...");
+  await clearBadge();
+  try {
+    const currentWasmModule = await ensureWasmModuleLoaded();
+    const filterListText = await fetchFilterList();
+    const { rules } = parseListWithWasm(currentWasmModule, filterListText);
 
-    // 2. Filterliste mit JavaScript parsen
-    console.time("JavaScript Parsing");
-    const rules = await parseFilterList(filterListText);
-    console.timeEnd("JavaScript Parsing");
-    console.log(`Parsed ${rules.length} rules via JavaScript.`);
+    console.log(`Attempting to add ${rules.length} rules.`);
+    console.log("First few rule IDs:", rules.slice(0, 20).map(r => r.id));
 
-    // 3. Regeln mit declarativeNetRequest anwenden
-    await updateRules(rules); // updateRules setzt jetzt auch den ruleCount im Storage
+    await updateRules(rules);
 
-    // 4. Initialisiere lokale Statistik-Zähler (optional, wird nicht für Badge genutzt)
-    const stats = await chrome.storage.local.get(['blockedCount']);
-    blockedRequestsCount = stats.blockedCount || 0;
+    const badgeTextAfterUpdate = await chrome.action.getBadgeText ? await chrome.action.getBadgeText({}) : '';
+    if (!badgeTextAfterUpdate || !badgeTextAfterUpdate.includes('ERR')) {
+        await clearBadge();
+        console.log("Initialization complete (WASM).");
+    } else {
+        console.log("Initialization completed but updateRules set an error badge.");
+    }
 
-    // 5. Badge nach erfolgreicher Initialisierung leeren (oder auf 'ON' setzen, falls gewünscht)
-    await clearBadge();
-    // Optional: Zeige "ON" an, wenn alles okay ist
-    // await chrome.action.setBadgeText({ text: 'ON' });
-    // await chrome.action.setBadgeBackgroundColor({ color: '#008000' }); // Grün
-
-    console.log("Initialization complete (JavaScript).");
-
-  } catch (error) {
-    console.error("Initialization failed (JavaScript):", error);
-    await setErrorBadge(); // Fehler im Badge anzeigen
-  }
+  } catch (error) {
+    console.error("Initialization failed (WASM):", error);
+    if (error.stack) { console.error(error.stack); }
+    await setErrorBadge('INIT ERR');
+    wasmModule = null;
+  }
 }
 
-// === Event Listeners ===
 
-// Listener für das Installations-/Update-Event
 chrome.runtime.onInstalled.addListener(details => {
-  console.log("Extension installed or updated:", details.reason);
-  initialize();
+  console.log("Extension installed or updated:", details.reason);
+  initialize();
 });
 
-// Listener für den Start des Browsers
 chrome.runtime.onStartup.addListener(async () => {
-    console.log("Browser startup detected.");
-    // Regeln sind persistent. Lade nur Zähler falls nötig.
-    const stats = await chrome.storage.local.get(['blockedCount']);
-    blockedRequestsCount = stats.blockedCount || 0;
-    console.log(`Loaded initial blocked count: ${blockedRequestsCount}`);
-    // Stelle sicher, dass der Badge leer ist oder den letzten Status (z.B. Fehler) anzeigt
-    const currentBadge = await chrome.action.getBadgeText({});
-    if (!currentBadge || currentBadge.includes('r')) { // Nur leeren, wenn kein Fehler angezeigt wird
-       await clearBadge();
-    }
-    // Optional: Rufe initialize() auf, um sicherzustellen, dass Regeln aktuell sind,
-    // aber updateRules entfernt und fügt Regeln jedes Mal neu hinzu. Nur bei Bedarf.
-    // initialize();
+    console.log("Browser startup detected.");
+    const currentBadge = await chrome.action.getBadgeText ? await chrome.action.getBadgeText({}) : '';
+    if (currentBadge && currentBadge.includes('ERR')) {
+         console.log("Attempting re-initialization on startup due to previous error state.");
+         initialize();
+    } else {
+         await clearBadge();
+         if (!wasmModule) {
+             console.log("Pre-initializing WASM module instance on startup.");
+             ensureWasmModuleLoaded()
+                .then(async () => {
+                    console.log("WASM module pre-initialized successfully on startup.");
+                    const badgeAfterPreInit = await chrome.action.getBadgeText ? await chrome.action.getBadgeText({}) : '';
+                    if (!badgeAfterPreInit || !badgeAfterPreInit.includes('ERR')) {
+                    }
+                 })
+                .catch(async (err) => {
+                    console.error("Background WASM pre-initialization failed:", err);
+                    const badgeBeforeSettingPreErr = await chrome.action.getBadgeText ? await chrome.action.getBadgeText({}) : '';
+                    if (!badgeBeforeSettingPreErr || !badgeBeforeSettingPreErr.includes('ERR')) {
+                       await setErrorBadge('PRE ERR');
+                    } else {
+                        console.warn("Background WASM pre-initialization failed, but an error state already exists.");
+                    }
+                 });
+         }
+    }
 });
 
-// Listener für Änderungen im Storage
-chrome.storage.onChanged.addListener((changes, namespace) => {
-  // Aktualisiere Badge NICHT mehr basierend auf ruleCount
-  /*
-  if (namespace === 'local' && changes.ruleCount) {
-    // const newRuleCount = changes.ruleCount.newValue || 0;
-    // chrome.action.setBadgeText({ text: `${newRuleCount}r` }); // ENTFERNT
-    // chrome.action.setBadgeBackgroundColor({ color: '#FFA500' }); // ENTFERNT
-    // console.log(`Rule count changed to: ${newRuleCount}`);
-  }
-  */
-
-   // Zähler-Update (wird nicht für Badge verwendet)
-   if (namespace === 'local' && changes.blockedCount) {
-       const newBlockedCount = changes.blockedCount.newValue || 0;
-       blockedRequestsCount = newBlockedCount;
-   }
-});
-
-// Listener für Nachrichten vom Popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === "getStats") {
-    // Hole aktuelle Werte aus dem Storage für die Regelanzahl
-    chrome.storage.local.get(['ruleCount']).then(stats => {
-        sendResponse({
-            ruleCount: stats.ruleCount || 0,
-            blockedCount: blockedRequestsCount // Sende den Platzhalter-Zähler
-        });
-    });
-    return true; // Asynchron
-  }
-  if (request.action === "reloadRules") {
-      console.log("Reloading rules triggered by message...");
-      initialize().then(async () => {
-          // Kurze Verzögerung, damit der Badge-Status von initialize() übernommen wird
-          await new Promise(resolve => setTimeout(resolve, 100));
-          sendResponse({ success: true, message: "Rules reloaded." });
-      }).catch(error => {
-          console.error("Failed to reload rules:", error);
-          sendResponse({ success: false, message: `Failed to reload rules: ${error.message}` });
-      });
-      return true; // Asynchron
-  }
+  if (request.action === "getStats") {
+    chrome.storage.local.get(['ruleCount']).then(storageData => {
+        sendResponse({ ruleCount: storageData.ruleCount === undefined ? 'N/A' : storageData.ruleCount });
+    }).catch(error => {
+        console.error("Error getting stats from storage:", error);
+        sendResponse({ ruleCount: 'Fehler' });
+    });
+    return true;
+  }
 
-  return false;
+  if (request.action === "reloadRules") {
+      console.log("Reloading rules triggered by popup message...");
+      initialize().then(async () => {
+          await new Promise(resolve => setTimeout(resolve, 200));
+          const storageData = await chrome.storage.local.get(['ruleCount']);
+          sendResponse({
+              success: true,
+              message: "Rules reloaded using WASM parser.",
+              ruleCount: storageData.ruleCount === undefined ? 'N/A' : storageData.ruleCount
+          });
+      }).catch(error => {
+          console.error("Failed to reload rules via message:", error);
+          sendResponse({ success: false, message: `Failed to reload rules: ${error.message}` });
+      });
+      return true;
+  }
+
+  return false;
 });
 
-// Starte die Initialisierung, wenn der Service Worker (neu) startet
 initialize();
