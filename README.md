@@ -32,7 +32,7 @@ This extension provides basic ad and tracker blocking functionality by parsing a
     * `action`
     * `runtime`
 * **HTML / CSS** (for the popup)
-* **(Experimental) C++ / WebAssembly (WASM)**: via Emscripten for the alternative parser (`wasm/parser.cc`, `wasm/filter_parser.js`). *Note: The WASM parser is not currently integrated into the main background script.*
+* **(Experimental) C++ / WebAssembly (WASM)**: via Emscripten for the alternative parser (`wasm/parser.cc`, `wasm/filter_parser.js`).
 
 ## Installation (Development)
 
@@ -61,8 +61,8 @@ The extension icon should appear in your browser toolbar.
 
 ## Future Improvements / Roadmap
 
-* Integrate the WebAssembly parser for potentially faster filter list processing.
-* Expand support for more complex filter list syntax (e.g., element hiding, advanced options).
+* Integrate the WebAssembly parser for potentially faster filter list processing. DONE
+* Expand support for more complex filter list syntax (e.g., element hiding, advanced options). DONE
 * Implement more robust statistics gathering (blocked request counts are limited by DNR feedback granularity).
 * Add user options (e.g., enabling/disabling lists, custom rules).
 * Implement automated filter list updates.
