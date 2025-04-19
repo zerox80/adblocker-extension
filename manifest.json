@@ -39,10 +39,6 @@
       "matches": [
         "<all_urls>"
       ]
-      // Kommentar: "<all_urls>" ist oft nötig, damit der JS-Loader (filter_parser.js)
-      // die WASM-Datei per fetch laden kann. Sicherer wäre ggf.
-      // "matches": ["chrome-extension://DeineExtensionIDHier/*"], aber das kann
-      // manchmal zu Problemen führen, je nachdem WIE die Datei geladen wird.
     }
   ]
 }
