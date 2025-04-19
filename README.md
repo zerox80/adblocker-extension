@@ -67,6 +67,11 @@ The extension icon should appear in your browser toolbar.
 * Add user options (e.g., enabling/disabling lists, custom rules).
 * Implement automated filter list updates.
 
+## USAGE EMCC 
+
+emcc parser.cc -o filter_parser.js -std=c++20 -O3 -I . --bind -s WASM=1 -s MODULARIZE=1 -s EXPORT_ES6=1 -sWASM_BIGINT -sNO_DYNAMIC_EXECUTION=1
+
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a pull request or open an issue.
