@@ -59,6 +59,9 @@ The extension icon should appear in your browser toolbar.
     * Be empty upon successful initialization/update.
     * Show 'ERR' or 'UPD ERR' in red if a critical error occurs during setup or rule updates.
 
+## compiling with emcc
+emcc parser.cc -o filter_parser.js -std=c++20 -O3 -I . --bind -s WASM=1 -s MODULARIZE=1 -s EXPORT_ES6=1 -sMINIMAL_RUNTIME=1 -sWASM_BIGINT
+
 ## Future Improvements / Roadmap
 
 * Integrate the WebAssembly parser for potentially faster filter list processing.
